@@ -29,9 +29,16 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
     5) atualiza historico e registra status final
     """
     results: List[TrackResult] = []
+    track_list = list(tracks)
+    total = len(track_list)
 
-    for idx, track in enumerate(tracks, start=1):
-        print(f"[{idx}] Buscando: {track}")
+    def print_progress(current: int, status: str) -> None:
+        """Mostra progresso simples no terminal apos cada faixa processada."""
+        percent = (current / total * 100) if total else 100
+        print(f"    Status: {status} | Progresso: {current}/{total} ({percent:.1f}%)")
+
+    for idx, track in enumerate(track_list, start=1):
+        print(f"[{idx}/{total}] Buscando: {track}")
         try:
             # Evita downloads repetidos entre execucoes diferentes, mas so pula
             # quando o arquivo registrado ainda existe fisicamente em downloads/.
@@ -40,12 +47,14 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
                 if known_file and (downloads_dir / known_file).exists():
                     results.append(TrackResult(track, "ja_baixada", "Ignorada: faixa ja existe no historico", file_name=known_file))
                     print("    Ignorada: ja baixada no historico")
+                    print_progress(idx, "ja_baixada")
                     continue
                 print("    Historico encontrado, mas arquivo ausente; baixando novamente")
 
             search_input = find_search_input(page)
             if not search_input:
                 results.append(TrackResult(track, "erro", "Campo de busca nao encontrado"))
+                print_progress(idx, "erro")
                 continue
 
             # Primeira tentativa usa texto completo da tracklist.
@@ -88,6 +97,7 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
                     mark_downloaded(history, track, file_name)
                     results.append(TrackResult(track, "ja_baixada", "Ignorada: arquivo ja existe no historico", file_name=file_name))
                     print(f"    Ignorada: arquivo ja baixado ({file_name})")
+                    print_progress(idx, "ja_baixada")
                     downloaded = True
                     break
 
@@ -97,6 +107,7 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
                 mark_downloaded(history, track, file_name)
                 results.append(TrackResult(track, "baixada", f"OK ({attempt_name})", file_name=file_name))
                 print(f"    Download iniciado: {file_name}")
+                print_progress(idx, "baixada")
                 page.wait_for_timeout(1200)
                 downloaded = True
                 break
@@ -104,14 +115,17 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
             if not downloaded:
                 mark_missing(history, track, last_detail)
                 results.append(TrackResult(track, "nao_encontrada", last_detail))
+                print_progress(idx, "nao_encontrada")
         except PlaywrightTimeoutError:
             # Timeouts de busca/download costumam significar que o site nao retornou
             # um resultado baixavel para essa faixa dentro do tempo esperado.
             detail = "Timeout durante busca/download"
             mark_missing(history, track, detail)
             results.append(TrackResult(track, "nao_encontrada", detail))
+            print_progress(idx, "nao_encontrada")
         except Exception as exc:
             # Qualquer erro inesperado e registrado para auditoria.
             results.append(TrackResult(track, "erro", f"Falha inesperada: {exc}"))
+            print_progress(idx, "erro")
 
     return results
