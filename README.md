@@ -1,46 +1,46 @@
 # TrackHunter
 
-TrackHunter is a Python + Playwright automation project for searching tracks on Muzpa, downloading MP3 files, and keeping an execution history to avoid duplicated downloads.
+TrackHunter e uma automacao em Python + Playwright para buscar faixas no Muzpa, baixar arquivos MP3 e manter um historico local para evitar downloads duplicados.
 
-## What It Does
+## O Que Ele Faz
 
-TrackHunter automates this workflow:
+O TrackHunter automatiza este fluxo:
 
-1. Opens Muzpa.
-2. Logs in automatically or manually.
-3. Reads a flexible `tracklist.txt`.
-4. Searches one track at a time.
-5. Clicks the best MP3 candidate found in the results.
-6. Saves downloaded files in `downloads/`.
-7. Writes a readable execution log in `logs/`.
-8. Keeps a local history in `state/track_history.json`.
+1. Acessa o Muzpa.
+2. Faz login automatico ou manual.
+3. Le uma `tracklist.txt` flexivel.
+4. Busca uma musica por vez.
+5. Clica no melhor candidato de MP3 encontrado nos resultados.
+6. Salva os arquivos baixados em `downloads/`.
+7. Gera um log legivel em `logs/`.
+8. Mantem historico local em `state/track_history.json`.
 
-## Tech Stack
+## Stack
 
 - Python 3.10+
-- Playwright for Python
-- Chromium browser automation
+- Playwright para Python
+- Automacao com navegador Chromium
 
-## Project Structure
+## Estrutura do Projeto
 
 ```text
 TrackHunter/
-|- muzpa_bot.py      # CLI entrypoint and main orchestration
-|- auth.py           # login and authentication flow
-|- search.py         # search field detection and result matching
-|- download.py       # per-track download workflow
-|- report.py         # final TXT log generation
-|- history.py        # local history for downloaded/missing tracks
-|- utils.py          # text normalization, track parsing, helpers
-|- models.py         # dataclasses used across modules
+|- muzpa_bot.py      # entrada CLI e orquestracao principal
+|- auth.py           # fluxo de login e autenticacao
+|- search.py         # deteccao do campo de busca e matching dos resultados
+|- download.py       # fluxo de download por faixa
+|- report.py         # geracao do log final em TXT
+|- history.py        # historico local de baixadas e nao encontradas
+|- utils.py          # normalizacao de texto, parsing da tracklist e helpers
+|- models.py         # dataclasses usadas entre os modulos
 |- requirements.txt
 |- tracklist.txt
-|- downloads/        # downloaded MP3 files
-|- logs/             # execution logs (.txt)
-`- state/            # local history JSON
+|- downloads/        # arquivos MP3 baixados
+|- logs/             # logs de execucao (.txt)
+`- state/            # historico local em JSON
 ```
 
-## Installation
+## Instalacao
 
 ```bash
 pip install -r requirements.txt
@@ -49,7 +49,7 @@ playwright install chromium
 
 ## Tracklist
 
-Edit `tracklist.txt` with one track per line:
+Edite o arquivo `tracklist.txt` com uma musica por linha:
 
 ```text
 Kaskade & CID ft. Anabel Englund - Vision Blurred (Agents Of Time Remix)
@@ -57,111 +57,111 @@ Agents Of Time & Miss Monique - Rajada
 Supermode - Tell Me Why
 ```
 
-The tracklist is dynamic. You can add, remove, or replace tracks before each run.
+A tracklist e dinamica. Voce pode adicionar, remover ou trocar musicas antes de cada execucao.
 
-## Automatic Login
+## Login Automatico
 
-Set credentials through environment variables:
+Configure as credenciais por variaveis de ambiente:
 
 ```powershell
-$env:MUZPA_EMAIL="your_email"
-$env:MUZPA_PASSWORD="your_password"
+$env:MUZPA_EMAIL="seu_email"
+$env:MUZPA_PASSWORD="sua_senha"
 python .\muzpa_bot.py --tracklist .\tracklist.txt --headless
 ```
 
-## Manual Login
+## Login Manual
 
-Use this mode when you want to log in through the browser window:
+Use este modo quando quiser fazer login pela janela do navegador:
 
 ```powershell
 python .\muzpa_bot.py --tracklist .\tracklist.txt --manual-login
 ```
 
-## Useful Commands
+## Comandos Uteis
 
-Run with visible browser:
+Executar com navegador visivel:
 
 ```powershell
 python .\muzpa_bot.py --tracklist .\tracklist.txt
 ```
 
-Run without browser UI:
+Executar sem interface grafica:
 
 ```powershell
 python .\muzpa_bot.py --tracklist .\tracklist.txt --headless
 ```
 
-Force downloads even if tracks already exist in history:
+Forcar download mesmo quando a faixa ja estiver no historico:
 
 ```powershell
 python .\muzpa_bot.py --tracklist .\tracklist.txt --force-download
 ```
 
-Retry only tracks previously marked as missing:
+Tentar novamente somente faixas marcadas como nao encontradas:
 
 ```powershell
 python .\muzpa_bot.py --retry-missing-only --headless
 ```
 
-Use custom folders:
+Usar pastas customizadas:
 
 ```powershell
 python .\muzpa_bot.py --tracklist .\tracklist.txt --downloads .\downloads --logs .\logs --history .\state\track_history.json
 ```
 
-## CLI Arguments
+## Argumentos CLI
 
-- `--tracklist`: path to the `.txt` file with tracks.
-- `--downloads`: folder where MP3 files are saved.
-- `--logs`: folder where execution logs are saved.
-- `--history`: JSON file used as local execution history.
-- `--output`: legacy alias for downloads folder.
-- `--headless`: runs without browser UI.
-- `--wait-login`: login timeout in milliseconds.
-- `--manual-login`: disables automatic credential filling.
-- `--force-download`: ignores history and downloads again.
-- `--retry-missing-only`: runs only tracks stored as missing in history.
+- `--tracklist`: caminho do arquivo `.txt` com as musicas.
+- `--downloads`: pasta onde os MP3 serao salvos.
+- `--logs`: pasta onde os logs de execucao serao salvos.
+- `--history`: arquivo JSON usado como historico local.
+- `--output`: alias legado para a pasta de downloads.
+- `--headless`: executa sem interface grafica.
+- `--wait-login`: timeout do login em milissegundos.
+- `--manual-login`: desativa preenchimento automatico de credenciais.
+- `--force-download`: ignora o historico e baixa novamente.
+- `--retry-missing-only`: executa somente faixas registradas como nao encontradas.
 
-## Smart History
+## Historico Inteligente
 
-TrackHunter stores local state in:
+O TrackHunter guarda estado local em:
 
 ```text
 state/track_history.json
 ```
 
-The history is used to:
+Esse historico serve para:
 
-- avoid downloading the same track repeatedly
-- remember tracks that were not found
-- retry missing tracks in future runs
-- remove a track from missing once it is downloaded
+- evitar baixar a mesma musica repetidas vezes
+- lembrar musicas que nao foram encontradas
+- tentar musicas nao encontradas em execucoes futuras
+- remover uma musica das pendencias quando ela for baixada
 
-Important behavior:
+Comportamentos importantes:
 
-- A track is skipped only when it exists in history and its MP3 still exists in `downloads/`.
-- If the MP3 was deleted from `downloads/`, TrackHunter downloads it again.
-- Missing tracks stay eligible for future searches.
-- `--force-download` bypasses the history.
+- Uma faixa so e ignorada quando esta no historico e o MP3 ainda existe em `downloads/`.
+- Se o MP3 foi apagado de `downloads/`, o TrackHunter baixa novamente.
+- Musicas nao encontradas continuam elegiveis para buscas futuras.
+- `--force-download` ignora o historico.
 
-## Search Strategy
+## Estrategia de Busca
 
-For each track, TrackHunter tries:
+Para cada faixa, o TrackHunter tenta:
 
-1. Full query from `tracklist.txt`.
-2. Fallback query using `title + version/remix`, without artist.
+1. Busca completa usando o texto da `tracklist.txt`.
+2. Busca alternativa usando `titulo + versao/remix`, sem artista.
 
-It prioritizes MP3 buttons, with ZIP/Download as fallback when needed.
+Ele prioriza botoes MP3, usando ZIP/Download como fallback quando necessario.
 
-## Log Format
+## Formato do Log
 
-Each run creates one TXT log:
+Cada execucao gera um unico log TXT:
 
 ```text
 logs/log_execucao_YYYYMMDD_HHMMSS.txt
 ```
 
-The log is organized into:
+O log e organizado em:
 
 - `Resumo da execucao`
 - `Concluidas com sucesso`
@@ -169,9 +169,9 @@ The log is organized into:
 - `Nao encontradas`
 - `Erros`
 
-## Runtime Files
+## Arquivos Locais
 
-These files/folders are local execution artifacts and are ignored by Git:
+Estes arquivos/pastas sao artefatos locais de execucao e ficam fora do Git:
 
 - `downloads/*`
 - `logs/*.txt`
@@ -179,14 +179,14 @@ These files/folders are local execution artifacts and are ignored by Git:
 - `state/*.json`
 - `.env`
 
-## Notes
+## Observacoes
 
-- Do not hardcode credentials in the source code.
-- Use environment variables for `MUZPA_EMAIL` and `MUZPA_PASSWORD`.
-- Review the TXT log after each run to validate what was downloaded.
-- Flexible matching can be useful for remixes and alternate versions, but the log should always be reviewed.
+- Nao deixe credenciais fixas no codigo.
+- Use variaveis de ambiente para `MUZPA_EMAIL` e `MUZPA_PASSWORD`.
+- Revise o log TXT depois de cada execucao para validar o que foi baixado.
+- O matching flexivel ajuda com remixes e versoes alternativas, mas o log deve sempre ser conferido.
 
-## Author
+## Autor
 
-Project developed and evolved by Paulo as a real-world automation and portfolio project.
+Projeto desenvolvido e evoluido por Paulo como automacao real e projeto de portfolio.
 
