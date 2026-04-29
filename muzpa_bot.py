@@ -9,6 +9,7 @@ from playwright.sync_api import sync_playwright
 # Modulos internos separados por responsabilidade.
 from auth import do_login
 from download import process_tracks
+from history import load_history, missing_tracks, save_history
 from report import write_results
 from utils import ensure_dir, load_tracklist
 
@@ -24,6 +25,7 @@ def main() -> None:
     - abre navegador
     - executa login (manual ou automatico)
     - processa downloads
+    - atualiza historico de baixadas/nao encontradas
     - grava log final
     """
     # Garante saida UTF-8 no terminal (acentos e caracteres especiais).
@@ -47,17 +49,35 @@ def main() -> None:
     parser.add_argument("--wait-login", type=int, default=90000, help="Timeout de login em ms")
     # Se ativo, usuario faz login manual na janela.
     parser.add_argument("--manual-login", action="store_true", help="Nao preenche login automaticamente")
+    # Arquivo JSON usado para evitar downloads duplicados e guardar nao encontradas.
+    parser.add_argument("--history", default="state/track_history.json", help="Arquivo JSON de historico")
+    # Ignora o historico de baixadas e permite baixar novamente.
+    parser.add_argument("--force-download", action="store_true", help="Ignora historico e baixa novamente")
+    # Processa somente faixas que ficaram como nao encontradas em execucoes anteriores.
+    parser.add_argument("--retry-missing-only", action="store_true", help="Busca somente faixas nao encontradas no historico")
     args = parser.parse_args()
 
     tracklist_path = Path(args.tracklist).resolve()
     # --output sobrescreve --downloads quando fornecido.
     downloads_dir = Path(args.output if args.output else args.downloads).resolve()
     logs_dir = Path(args.logs).resolve()
+    history_path = Path(args.history).resolve()
     ensure_dir(downloads_dir)
     ensure_dir(logs_dir)
 
-    # Carrega tracks do txt.
-    tracks = load_tracklist(tracklist_path)
+    # Historico persistente: baixadas sao puladas; nao encontradas podem ser tentadas de novo.
+    history = load_history(history_path)
+
+    if args.retry_missing_only:
+        # Neste modo, a fonte de faixas e o historico, nao a tracklist.
+        tracks = missing_tracks(history)
+        if not tracks:
+            print("Nenhuma faixa nao encontrada no historico para tentar novamente.")
+            write_results(logs_dir, [])
+            return
+    else:
+        # Carrega tracks do txt.
+        tracks = load_tracklist(tracklist_path)
 
     # Credenciais para login automatico.
     email = os.getenv("MUZPA_EMAIL", "")
@@ -88,7 +108,8 @@ def main() -> None:
         page.wait_for_timeout(2000)
 
         # Processa a lista e retorna resultados estruturados.
-        results = process_tracks(page, tracks, downloads_dir)
+        results = process_tracks(page, tracks, downloads_dir, history, force_download=args.force_download)
+        save_history(history_path, history)
         # Salva log final da execucao.
         write_results(logs_dir, results)
 

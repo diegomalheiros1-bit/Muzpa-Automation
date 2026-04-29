@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Historico local em `state/track_history.json`.
+- Bloqueio automatico para evitar download duplicado de faixas ja baixadas.
+- Registro persistente de musicas nao encontradas, mantendo elas elegiveis para novas buscas.
+- Opcao `--force-download` para ignorar o historico quando necessario.
+- Opcao `--retry-missing-only` para buscar somente faixas nao encontradas anteriormente.
+
 ## v1.0.0 - 2026-04-28
 
 ### Added
@@ -22,4 +31,3 @@
 
 ### Removed
 - Geracao de relatorios CSV/Excel (mantido somente log `.txt`).
-

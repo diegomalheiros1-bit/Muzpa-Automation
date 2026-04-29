@@ -11,6 +11,7 @@ venv/
 logs/*.csv
 logs/*.txt
 downloads/*
+state/*.json
 
 # Local secrets/config
 .env

@@ -5,7 +5,7 @@ from dataclasses import dataclass
 class TrackResult:
     # Faixa original lida do arquivo de tracklist.
     track: str
-    # Resultado final da tentativa: baixada | nao_encontrada | erro.
+    # Resultado final: baixada | ja_baixada | nao_encontrada | erro.
     status: str
     # Mensagem curta explicando o que aconteceu com a faixa.
     detail: str
