@@ -188,5 +188,5 @@ Estes arquivos/pastas sao artefatos locais de execucao e ficam fora do Git:
 
 ## Autor
 
-Projeto desenvolvido e evoluido por Paulo como automacao real e projeto de portfolio.
+Projeto desenvolvido e evoluido por Diego Stanisci Malheiros como automacao real e projeto de portfolio.
 
