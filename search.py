@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 from playwright.sync_api import Locator, Page
 
-from .utils import normalize_text
+from utils import normalize_text
 
 
 def find_search_input(page: Page) -> Optional[Locator]:

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from .models import TrackResult
+from models import TrackResult
 
 
 def write_results(logs_dir, results: List[TrackResult]) -> None:
@@ -11,7 +11,6 @@ def write_results(logs_dir, results: List[TrackResult]) -> None:
     """
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file = logs_dir / f"log_execucao_{ts}.txt"
-    missing_file = logs_dir / f"nao_encontradas_{ts}.txt"
 
     # Contadores de resumo.
     total = len(results)
@@ -51,12 +50,5 @@ def write_results(logs_dir, results: List[TrackResult]) -> None:
         write_section(fh, "Nao encontradas", not_found_rows)
         write_section(fh, "Erros", error_rows)
 
-    if not_found_rows:
-        with missing_file.open("w", encoding="utf-8-sig") as fh:
-            for row in not_found_rows:
-                fh.write(f"{row.track}\n")
-
     print("\nArquivos gerados:")
     print(f"- {log_file}")
-    if not_found_rows:
-        print(f"- {missing_file}")

@@ -2,10 +2,10 @@ from typing import Iterable, List
 
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeoutError
 
-from .history import downloaded_file_name, is_downloaded, is_file_downloaded, is_missing, mark_downloaded, mark_missing
-from .models import TrackResult
-from .search import best_download_candidate_for_track, find_search_input
-from .utils import build_fallback_query, normalize_text
+from history import downloaded_file_name, is_downloaded, is_file_downloaded, mark_downloaded, mark_missing
+from models import TrackResult
+from search import best_download_candidate_for_track, find_search_input
+from utils import build_fallback_query, normalize_text
 
 
 def click_download(page: Page, candidate):
@@ -45,15 +45,9 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
             if not force_download and is_downloaded(history, track):
                 known_file = downloaded_file_name(history, track)
                 if known_file and (downloads_dir / known_file).exists():
-                    if is_missing(history, track):
-                        mark_downloaded(history, track, known_file)
-                        results.append(TrackResult(track, "baixada", "Resolvida: faixa pendente ja existia no historico", file_name=known_file))
-                        print("    Resolvida: pendencia ja estava baixada no historico")
-                        print_progress(idx, "baixada")
-                    else:
-                        results.append(TrackResult(track, "ja_baixada", "Ignorada: faixa ja existe no historico", file_name=known_file))
-                        print("    Ignorada: ja baixada no historico")
-                        print_progress(idx, "ja_baixada")
+                    results.append(TrackResult(track, "ja_baixada", "Ignorada: faixa ja existe no historico", file_name=known_file))
+                    print("    Ignorada: ja baixada no historico")
+                    print_progress(idx, "ja_baixada")
                     continue
                 print("    Historico encontrado, mas arquivo ausente; baixando novamente")
 
@@ -100,16 +94,10 @@ def process_tracks(page: Page, tracks: Iterable[str], downloads_dir, history, fo
                 file_name = download.suggested_filename or ""
                 if file_name and not force_download and is_file_downloaded(history, file_name) and (downloads_dir / file_name).exists():
                     # Tambem associa esta linha da tracklist ao arquivo conhecido.
-                    was_missing = is_missing(history, track)
                     mark_downloaded(history, track, file_name)
-                    if was_missing:
-                        results.append(TrackResult(track, "baixada", "Resolvida: arquivo ja existia no historico", file_name=file_name))
-                        print(f"    Resolvida: arquivo ja baixado ({file_name})")
-                        print_progress(idx, "baixada")
-                    else:
-                        results.append(TrackResult(track, "ja_baixada", "Ignorada: arquivo ja existe no historico", file_name=file_name))
-                        print(f"    Ignorada: arquivo ja baixado ({file_name})")
-                        print_progress(idx, "ja_baixada")
+                    results.append(TrackResult(track, "ja_baixada", "Ignorada: arquivo ja existe no historico", file_name=file_name))
+                    print(f"    Ignorada: arquivo ja baixado ({file_name})")
+                    print_progress(idx, "ja_baixada")
                     downloaded = True
                     break
 

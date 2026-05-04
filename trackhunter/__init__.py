@@ -1,2 +1,0 @@
-"""Track Hunter application package."""
-

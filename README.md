@@ -25,18 +25,14 @@ O TrackHunter automatiza este fluxo:
 
 ```text
 TrackHunter/
-|- trackhunter/      # pacote principal da aplicacao
-|  |- app.py         # interface desktop PySide6
-|  |- cli.py         # entrada CLI e orquestracao principal
-|  |- auth.py        # fluxo de login e autenticacao
-|  |- search.py      # deteccao do campo de busca e matching dos resultados
-|  |- download.py    # fluxo de download por faixa
-|  |- report.py      # geracao do log final em TXT
-|  |- history.py     # historico local de baixadas e nao encontradas
-|  |- utils.py       # normalizacao de texto, parsing da tracklist e helpers
-|  `- models.py      # dataclasses usadas entre os modulos
-|- scripts/          # scripts auxiliares de build/execucao
-|- dist/             # executavel gerado pelo PyInstaller
+|- muzpa_bot.py      # entrada CLI e orquestracao principal
+|- auth.py           # fluxo de login e autenticacao
+|- search.py         # deteccao do campo de busca e matching dos resultados
+|- download.py       # fluxo de download por faixa
+|- report.py         # geracao do log final em TXT
+|- history.py        # historico local de baixadas e nao encontradas
+|- utils.py          # normalizacao de texto, parsing da tracklist e helpers
+|- models.py         # dataclasses usadas entre os modulos
 |- requirements.txt
 |- tracklist.txt
 |- downloads/        # arquivos MP3 baixados
@@ -70,7 +66,7 @@ Configure as credenciais por variaveis de ambiente:
 ```powershell
 $env:MUZPA_EMAIL="seu_email"
 $env:MUZPA_PASSWORD="sua_senha"
-python -m trackhunter.cli --tracklist .\tracklist.txt --headless
+python .\muzpa_bot.py --tracklist .\tracklist.txt --headless
 ```
 
 ## Login Manual
@@ -78,7 +74,7 @@ python -m trackhunter.cli --tracklist .\tracklist.txt --headless
 Use este modo quando quiser fazer login pela janela do navegador:
 
 ```powershell
-python -m trackhunter.cli --tracklist .\tracklist.txt --manual-login
+python .\muzpa_bot.py --tracklist .\tracklist.txt --manual-login
 ```
 
 ## Comandos Uteis
@@ -86,56 +82,32 @@ python -m trackhunter.cli --tracklist .\tracklist.txt --manual-login
 Executar com navegador visivel:
 
 ```powershell
-python -m trackhunter.cli --tracklist .\tracklist.txt
+python .\muzpa_bot.py --tracklist .\tracklist.txt
 ```
 
 Executar sem interface grafica:
 
 ```powershell
-python -m trackhunter.cli --tracklist .\tracklist.txt --headless
+python .\muzpa_bot.py --tracklist .\tracklist.txt --headless
 ```
 
 Forcar download mesmo quando a faixa ja estiver no historico:
 
 ```powershell
-python -m trackhunter.cli --tracklist .\tracklist.txt --force-download
+python .\muzpa_bot.py --tracklist .\tracklist.txt --force-download
 ```
 
 Tentar novamente somente faixas marcadas como nao encontradas:
 
 ```powershell
-python -m trackhunter.cli --retry-missing-only --headless
+python .\muzpa_bot.py --retry-missing-only --headless
 ```
 
 Usar pastas customizadas:
 
 ```powershell
-python -m trackhunter.cli --tracklist .\tracklist.txt --downloads .\downloads --logs .\logs --history .\state\track_history.json
+python .\muzpa_bot.py --tracklist .\tracklist.txt --downloads .\downloads --logs .\logs --history .\state\track_history.json
 ```
-
-## Interface Grafica (Novo)
-
-Agora o projeto inclui uma interface desktop em `trackhunter/app.py`, para executar sem usar terminal.
-
-Instale as dependencias:
-
-```bash
-pip install -r requirements.txt
-playwright install chromium
-```
-
-Abra a interface:
-
-```bash
-python -m trackhunter.app
-```
-
-Pela tela voce pode:
-
-- informar usuario e senha do MUZPA
-- escolher tracklist, pasta de downloads, logs e historico
-- ligar/desligar login manual, headless e opcoes extras
-- acompanhar o log em tempo real
 
 ## Argumentos CLI
 
@@ -217,3 +189,4 @@ Estes arquivos/pastas sao artefatos locais de execucao e ficam fora do Git:
 ## Autor
 
 Projeto desenvolvido e evoluido por Diego Stanisci Malheiros como automacao real e projeto de portfolio.
+

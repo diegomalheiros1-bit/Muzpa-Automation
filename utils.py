@@ -3,7 +3,7 @@ import unicodedata
 from pathlib import Path
 from typing import List
 
-from .models import TrackParts
+from models import TrackParts
 
 
 def normalize_text(value: str) -> str:
