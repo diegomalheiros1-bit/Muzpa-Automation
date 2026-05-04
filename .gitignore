@@ -13,6 +13,11 @@ logs/*.txt
 downloads/*
 state/*.json
 
+# Build artifacts
+build/
+dist/
+release/
+
 # Local secrets/config
 .env
 .env.*

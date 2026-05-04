@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
 
-from utils import normalize_text
+from .utils import normalize_text
 
 
 def empty_history() -> Dict:
@@ -17,6 +17,24 @@ def empty_history() -> Dict:
         "arquivos": {},
         "nao_encontradas": {},
     }
+
+
+def reconcile_history(history: Dict) -> Dict:
+    """
+    Remove inconsistencias simples do historico.
+    Uma faixa baixada nao deve continuar pendente em nao_encontradas.
+    """
+    source = history or {}
+    normalized = empty_history()
+    normalized["baixadas"] = dict(source.get("baixadas", {}))
+    normalized["arquivos"] = dict(source.get("arquivos", {}))
+    normalized["nao_encontradas"] = dict(source.get("nao_encontradas", {}))
+
+    downloaded_keys = set(normalized.get("baixadas", {}))
+    for key in list(normalized.get("nao_encontradas", {})):
+        if key in downloaded_keys:
+            normalized["nao_encontradas"].pop(key, None)
+    return normalized
 
 
 def track_key(track: str) -> str:
@@ -42,7 +60,7 @@ def load_history(path: Path) -> Dict:
 
     history = empty_history()
     history.update(data)
-    return history
+    return reconcile_history(history)
 
 
 def save_history(path: Path, history: Dict) -> None:
@@ -55,6 +73,11 @@ def save_history(path: Path, history: Dict) -> None:
 def is_downloaded(history: Dict, track: str) -> bool:
     """Verifica se a faixa ja foi baixada antes pelo texto da tracklist."""
     return track_key(track) in history.get("baixadas", {})
+
+
+def is_missing(history: Dict, track: str) -> bool:
+    """Verifica se a faixa esta pendente como nao encontrada."""
+    return track_key(track) in history.get("nao_encontradas", {})
 
 
 def downloaded_file_name(history: Dict, track: str) -> str:
@@ -113,4 +136,5 @@ def mark_missing(history: Dict, track: str, detail: str) -> None:
 
 def missing_tracks(history: Dict) -> List[str]:
     """Retorna a lista de faixas marcadas como nao encontradas."""
-    return [item["track"] for item in history.get("nao_encontradas", {}).values()]
+    reconciled = reconcile_history(history)
+    return [item["track"] for item in reconciled.get("nao_encontradas", {}).values()]
